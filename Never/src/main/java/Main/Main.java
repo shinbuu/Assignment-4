@@ -8,42 +8,49 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         try {
-            String url = "jdbc:mysql://localhost:3306/aqua_shop";
+            String url = "jdbc:mysql://localhost:3306/aqua_shop"; // инициализируем данные для подключения:localhost это адресс папки с базами данных ,а aqua_shop - это сама база данных откуда мы будем брать значения таблиц
             String username = "root";
             String password = "ILoveMagicWands13";
-            Connection conn = DriverManager.getConnection(url, username, password);
-            Statement st = conn.createStatement();
-            ArrayList<Items> bag = new ArrayList<Items>();
-            int sum = 0;
-
+            Connection conn = DriverManager.getConnection(url, username, password); //Собственно здесь уже создаем переменную conn ,которая и будет содержать подключение
+            Statement st = conn.createStatement(); //Statement - это запросы в sql через jav`у
+            ArrayList<Items> items = new ArrayList<Items>(); //создаем гибкий arraylist для листа покупок
+            int sum = 0; // сумма для покупок 
+            System.out.println("____________________________________________________"); // просто приветсвенная надпись
+            System.out.println("Hello!This is the Aqua Shop!Let`s try to buy you a new aquarium with fishes ,reptiles and more!So ,please choose a thing that you need in your aquarium.");
+            System.out.println("____________________________________________________");
             while (true){
-                label:
+                label: //эта просто название и оно нужно если юзер ввел неправильное значение ,то код продолжается
                 while (true){
-                    System.out.println("1. Fishes\n2. Reptiles\n3. Aquariums\n4. Toys\n5. Filters \n6. Sands \n7. Feed \n8. Cart and total price \n9. Exit");
+                    System.out.println("1. Fishes\n2. Reptiles\n3. Aquariums\n4. Toys\n5. Filters \n6. Sands \n7. Feed \n8. Cart and total price \n9. Exit"); // тут юзер выбирает что ему нужно
                     int n = sc.nextInt();
                     ResultSet rs;
                     int id;
                     int price;
                     String name;
                     int choose;
-                    switch (n){
+                    switch (n) { //свитч для определения выбора
                         case 1:
-                            rs = st.executeQuery("select * from fishes");
+                            rs = st.executeQuery("select * from fishes"); //создаем соединение ,затем запрос в sql и выбираем таблицу рыб
 
                                 while (rs.next()){
-                                    id =rs.getInt(1);
+                                    id =rs.getInt(1); // получаем данные с первой колонки в таблице (id) и записываем ее в переменную id
                                     name = rs.getString(2);
                                     price = rs.getInt(3);
-                                    System.out.println(id + ", Name: " + name + ", price: " + price);
+                                    System.out.println(id + ", Name: " + name + ", price: " + price); //выводим значения записанные таблицы в System.out.print
                                 }
-                                rs.close();
-                                choose = sc.nextInt();
-                                for (rs = st.executeQuery("select name, price from fishes where id = " + choose + ";"); rs.next(); sum += price){
-                                    name = rs.getString(1);
-                                    price = rs.getInt(2);
-                                    bag.add(new Items(name + " " + price));
+                                rs.close(); //закрываем соединение ибо как нам завещали "1 соединение 1 запрос"
+                                choose = sc.nextInt();// сканим каких рыб выбрал юзер
+                                rs = st.executeQuery("select name, price from fishes where id = " + choose + ";"); //делаем новый запрос в sql где выбираем рыб с id которые ввел юхер
+
+                                while (true) {
+                                if (!rs.next()){
+                                    continue label;
                                 }
-                                break;
+                                name = rs.getString(1); //записываем в название переменной name значение из таблицы fishes где айди рыбки соответсвует id которое ввел юзер ранее
+                                price = rs.getInt(2);
+                                items.add(new Items(name + " " + price)); //добавляем новую покупку в гибкий arraylist
+                                sum += price; //добавляем данные из переменной price к общей сумме
+                                }
                         case 2:
                             rs = st.executeQuery("select * from reptiles");
                             while (rs.next()) {
@@ -63,7 +70,7 @@ public class Main {
                                     }
                                     name = rs.getString(1);
                                     price = rs.getInt(2);
-                                    bag.add(new Items(name + " " + price));
+                                    items.add(new Items(name + " " + price));
                                     sum += price;
                                 }
                         case 3:
@@ -86,7 +93,7 @@ public class Main {
                                 }
                                 name = rs.getString(1);
                                 price = rs.getInt(2);
-                                bag.add(new Items(name + " " + price));
+                                items.add(new Items(name + " " + price));
                                 sum += price;
                             }
                         case 4:
@@ -110,7 +117,7 @@ public class Main {
 
                                 name = rs.getString(1);
                                 price = rs.getInt(2);
-                                bag.add(new Items(name + " " + price));
+                                items.add(new Items(name + " " + price));
                                 sum += price;
                             }
                         case 5:
@@ -134,7 +141,7 @@ public class Main {
 
                                 name = rs.getString(1);
                                 price = rs.getInt(2);
-                                bag.add(new Items(name + " " + price));
+                                items.add(new Items(name + " " + price));
                                 sum += price;
                             }
 
@@ -159,7 +166,7 @@ public class Main {
 
                                 name = rs.getString(1);
                                 price = rs.getInt(2);
-                                bag.add(new Items(name + " " + price));
+                                items.add(new Items(name + " " + price));
                                 sum += price;
                             }
 
@@ -184,16 +191,18 @@ public class Main {
 
                                 name = rs.getString(1);
                                 price = rs.getInt(2);
-                                bag.add(new Items(name + " " + price));
+                                items.add(new Items(name + " " + price));
                                 sum += price;
                             }
 
                         case 8:
-                            for(int i = 0; i < bag.size(); ++i) {
-                                System.out.println(bag.get(i));
+                            System.out.println("+_________+");
+                            for(int i = 0; i < items.size(); ++i) {  //Классеека ,показываем значения из arraylista
+                                System.out.println("|" + items.get(i) + "|");
                             }
-
-                            System.out.println(sum);
+                            System.out.println("+_________+");
+                            System.out.println("Sum: " + sum);
+                            System.out.println("____________________________________________________");
                             break;
                         case 9:
                             System.exit(0);
